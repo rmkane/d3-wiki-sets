@@ -1,0 +1,60 @@
+:root {
+  --background-color: #111;
+  --foreground-color: #EEE;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+select, textarea {
+  background: var(--background-color);
+  color: var(--foreground-color);
+}
+
+.page-wrapper {
+  height: calc(100% - 2em);
+  background: var(--background-color);
+  color: var(--foreground-color);
+}
+
+.page-wrapper {
+  display: flex;
+  flex-flow: column;
+  padding: 1em;
+}
+
+.header {
+  text-align: center;
+}
+
+.input-wrapper {
+  padding: 0.5em;
+}
+
+.output-wrapper {
+  display: flex;
+  flex-flow: column;
+  flex:2;
+  background: green;
+  padding: 0.5em;
+}
+.header {
+  font-size: 2em;
+}
+
+.output-wrapper > .set-name {
+  font-size: 1.5em;
+  margin: 0 0 0.5em 0;
+}
+
+.output-wrapper > textarea {
+  flex: 1;
+  padding: 0.5em;
+}
+
+.input-field {
+  display: inline-block;
+  margin-right: 1em;
+}
