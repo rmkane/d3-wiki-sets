@@ -91,8 +91,8 @@ The item only drops at [[character level]] ${set.level}, and only at [[Tormen
 ==Stats (Level ${set.level})==
 [[File:${imgName}.png|right]]
 
-{{Set|${itemName}}}<br />
-Set ${slot.type}}}
+{{Set|${itemName}<br />
+Set ${slotValues.name}}}
 * ${setItem.stats.armor.join('–')} Armor
 
 {{Magic block|
