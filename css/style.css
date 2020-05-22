@@ -8,9 +8,10 @@ html, body {
   margin: 0;
 }
 
-select, textarea {
+input, select, textarea {
   background: var(--background-color);
   color: var(--foreground-color);
+  font-family: monospace;
 }
 
 .page-wrapper {
@@ -27,6 +28,7 @@ select, textarea {
 
 .header {
   text-align: center;
+  margin-bottom: 0.667em;
 }
 
 .input-wrapper {

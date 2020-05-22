@@ -14,6 +14,14 @@ const inputMap = {
       type: 'change',
       fn: 'onSetItemChange'
     }
+  },
+  setAvailable : {
+    el : null,
+    selector: 'input[name="set-available"]',
+    listener: {
+      type: 'change',
+      fn: 'onAvailabilityChange'
+    }
   }
 };
 
@@ -33,7 +41,8 @@ const init = () => {
 const registerListeners = () => {
   Object.assign(listenerMap, {
     onSetChange : onSetChange,
-    onSetItemChange : onSetItemChange
+    onSetItemChange : onSetItemChange,
+    onAvailabilityChange: onAvailabilityChange
   })
 };
 
@@ -57,26 +66,30 @@ const renderWikiText = (set, setItem) => {
   const slot = slotData[setItem.slot];
   const itemName = setItem.name || (slot.short || slot.type);
   const imgName = shortName + (slot.short || slot.type);
+  const notices = [ '{{stub}}' ];
 
-  return `{{future}}
-{{stub}}
-'''${itemName}''' ${slot.plural ? 'are' : 'is'} a ${slot.short ? `[[${slot.type}|${slot.short}]]` : `[[${slot.type}]]`} piece of the ${set.name} [[Set Items|set]] in ''[[Diablo III]]''.
+  if (getEl('setAvailable').checked === false) {
+    notices.unshift('{{future}}');
+  }
 
-It only drops at [[character level]] 70, and only at [[Torment (difficulty)|Torment]] difficulty. Note that ${slot.plural ? 'they' : 'it'} can only be worn by [[${set.class} (Diablo III)|${set.class}]]s.
+  return `${notices.join('\n')}
+'''${itemName}''' is ${slot.plural ? 'a pair of' : 'a'} ${slot.short ? `[[${slot.type}|${slot.short}]]` : `[[${slot.type}]]`} from the [[${set.name}]] [[Set Items|set]] in ''[[Diablo III]]''.
 
-==Stats (Level 70)==
+The item only drops at [[character level]] ${set.level}, and only at [[Torment (difficulty)|Torment]] difficulty. Note that ${slot.plural ? 'they' : 'it'} can only be worn by [[${set.class} (Diablo III)|${set.class}]]s.
+
+==Stats (Level ${set.level})==
 [[File:${imgName}.png|right]]
 
 {{Set|${itemName}}}<br />
 Set ${slot.type}}}
-* 559-595 Armor
+* ${setItem.stats.armor.join('–')} Armor
 
 {{Magic block|
 Properties:
 *One of 3 Magic Properties (varies):
-**+626–750 [[Dexterity]]
-**+626–750 [[Strength]]
-**+626–750 [[Intelligence]]
+**+${setItem.stats.dex.join('–')} [[Dexterity]]
+**+${setItem.stats.str.join('–')} [[Strength]]
+**+${setItem.stats.int.join('–')} [[Intelligence]]
 *+4 Random Magic Properties
 *Empty [[Socket]]
 }}
@@ -88,22 +101,36 @@ Properties:
 
 
 const onSetChange = (e) => {
+  const currentSet = getCurrentSet();
+  const isAvailable = currentSet.available === undefined || currentSet.available !== false;
+
   getEl('setItemList').innerHTML = '';
-  getCurrentSet().pieces.forEach((piece, index) => {
+  currentSet.pieces.forEach((piece, index) => {
     const text = piece.name || piece.slot;
     getEl('setItemList').appendChild(new Option(text, index.toString()));
   });
+  getEl('setAvailable').checked = isAvailable;
   triggerEvent(getEl('setItemList'), 'change');
 };
 
 const onSetItemChange = (e) => {
+  update();
+};
+
+const onAvailabilityChange = (e) => {
+  update();
+};
+
+const update = () => {
   const currSet = getCurrentSet();
   const currentSetItem = getCurrentSetItem();
   const slot = slotData[currentSetItem.slot];
-  const itemName = currentSetItem.name || (slot.short || slot.type)
+  const itemName = currentSetItem.name || (slot.short || slot.type);
+  const wikiText = renderWikiText(currSet, currentSetItem);
 
-  document.querySelector('.set-name').textContent = itemName;
-  document.querySelector('.output-wrapper > textarea').value = renderWikiText(currSet, currentSetItem);
+  //console.log(Wiky.toHtml(wikiText));
+  document.querySelector('.set-name').textContent = `${itemName} (${currSet.class})`;
+  document.querySelector('.output-wrapper > textarea').value = wikiText;
 };
 
 const getCurrentSet = () => setData[getSelectIndex('setList')];
