@@ -25,14 +25,24 @@ const inputMap = {
   }
 };
 
+const setData = [];
 const listenerMap = {};
 
 const main = () => {
+  fetch('data/sets.json')
+      .then(response => response.json())
+      .then((jsonData) => {
+        setData.push(...jsonData);
+        onLoad();
+      });
+};
+
+const onLoad = () => {
   init();
   registerListeners();
   addEvents();
   ready();
-};
+}
 
 const init = () => {
   Object.keys(inputMap).forEach(key => inputMap[key].el = document.querySelector(inputMap[key].selector));
@@ -64,16 +74,16 @@ const ready = () => {
 const renderWikiText = (set, setItem) => {
   const shortName = toTitleCase(set.shortName);
   const slot = slotData[setItem.slot];
-  const itemName = setItem.name || (slot.short || slot.type);
-  const imgName = shortName + (slot.short || slot.type);
+  const slotValues = slot.types[setItem.type || slot.defaultType];
+  const itemName = setItem.name || slotValues.name;
+  const prefix = slotValues.prefix === true || slotValues.prefix === undefined ? (slot.plural ? 'a pair of ' : 'a ') : '';
+  const imgName = slot.type;
   const notices = [ '{{stub}}' ];
 
-  if (getEl('setAvailable').checked === false) {
-    notices.unshift('{{future}}');
-  }
+  if (getEl('setAvailable').checked === false) notices.unshift('{{future}}');
 
   return `${notices.join('\n')}
-'''${itemName}''' is ${slot.plural ? 'a pair of' : 'a'} ${slot.short ? `[[${slot.type}|${slot.short}]]` : `[[${slot.type}]]`} from the [[${set.name}]] [[Set Items|set]] in ''[[Diablo III]]''.
+'''${itemName}''' is ${prefix}[[${slotValues.name}]] from the [[${set.name}]] [[Set Items|set]] in ''[[Diablo III]]''.
 
 The item only drops at [[character level]] ${set.level}, and only at [[Torment (difficulty)|Torment]] difficulty. Note that ${slot.plural ? 'they' : 'it'} can only be worn by [[${set.class} (Diablo III)|${set.class}]]s.
 
