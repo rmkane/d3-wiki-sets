@@ -38,17 +38,19 @@ input, select, textarea {
 .output-wrapper {
   display: flex;
   flex-flow: column;
-  flex:2;
+  flex: 2;
   background: green;
   padding: 0.5em;
 }
+
 .header {
   font-size: 2em;
 }
 
 .output-wrapper > .set-name {
-  font-size: 1.5em;
   margin: 0 0 0.5em 0;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .output-wrapper > textarea {
@@ -59,4 +61,12 @@ input, select, textarea {
 .input-field {
   display: inline-block;
   margin-right: 1em;
+}
+
+select[name="set-list"] {
+  min-width: 20em;
+}
+
+select[name="set-item-list"] {
+  min-width: 16em;
 }

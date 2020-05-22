@@ -1,4 +1,4 @@
-const slotData = {
+{
   "head": {
     "types": {
       "HELM": {"name": "Helm"},
@@ -43,4 +43,4 @@ const slotData = {
     "defaultType": "BOOTS",
     "plural": true
   }
-};
+}

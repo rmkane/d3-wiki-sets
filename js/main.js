@@ -25,30 +25,34 @@ const inputMap = {
   }
 };
 
-const setData = [];
+const data = {};
 const listenerMap = {};
 
-const main = () => {
-  fetch('data/sets.json')
-      .then(response => response.json())
-      .then((jsonData) => {
-        setData.push(...jsonData);
-        onLoad();
-      });
+const main = async () => {
+  await init();
+  await registerListeners();
+  await addEvents();
+  await ready();
 };
 
-const onLoad = () => {
-  init();
-  registerListeners();
-  addEvents();
-  ready();
-}
+/**
+ * @param {string} url
+ * @returns {object}
+ */
+const fetchJson = async (url) => {
+  let request = await fetch(url);
+  return request.json();
+};
 
-const init = () => {
+const init = async () => {
+  // Load the data
+  data.sets = await fetchJson('data/sets.json');
+  data.slots = await fetchJson('data/slots.json');
+
   Object.keys(inputMap).forEach(key => inputMap[key].el = document.querySelector(inputMap[key].selector));
 };
 
-const registerListeners = () => {
+const registerListeners = async () => {
   Object.assign(listenerMap, {
     onSetChange : onSetChange,
     onSetItemChange : onSetItemChange,
@@ -56,28 +60,25 @@ const registerListeners = () => {
   })
 };
 
-const addEvents = () => {
+const addEvents = async () => {
   Object.keys(inputMap).forEach(key => {
     const listener = inputMap[key].listener;
     inputMap[key].el.addEventListener(listener.type, listenerMap[listener.fn]);
   });
 };
 
-const ready = () => {
-  setData.forEach((set, index) => getEl('setList').appendChild(new Option(set.name, index.toString())));
+const ready = async () => {
+  data.sets.forEach((set, index) => getEl('setList').appendChild(new Option(set.name, index.toString())));
 
   getEl('setList').value = 2 // Testing...
 
   triggerEvent(getEl('setList'), 'change');
 };
 
-const renderWikiText = (set, setItem) => {
+const renderWikiText = (set, setItem, itemName, slot, slotValues) => {
   const shortName = toTitleCase(set.shortName);
-  const slot = slotData[setItem.slot];
-  const slotValues = slot.types[setItem.type || slot.defaultType];
-  const itemName = setItem.name || slotValues.name;
   const prefix = slotValues.prefix === true || slotValues.prefix === undefined ? (slot.plural ? 'a pair of ' : 'a ') : '';
-  const imgName = slot.type;
+  const imgName = slotValues.name;
   const notices = [ '{{stub}}' ];
 
   if (getEl('setAvailable').checked === false) notices.unshift('{{future}}');
@@ -134,16 +135,17 @@ const onAvailabilityChange = (e) => {
 const update = () => {
   const currSet = getCurrentSet();
   const currentSetItem = getCurrentSetItem();
-  const slot = slotData[currentSetItem.slot];
-  const itemName = currentSetItem.name || (slot.short || slot.type);
-  const wikiText = renderWikiText(currSet, currentSetItem);
+  const slot = data.slots[currentSetItem.slot];
+  const slotValues = slot.types[currentSetItem.type || slot.defaultType];
+  const itemName = currentSetItem.name || slotValues.name;
+  const wikiText = renderWikiText(currSet, currentSetItem, itemName, slot, slotValues);
 
   //console.log(Wiky.toHtml(wikiText));
-  document.querySelector('.set-name').textContent = `${itemName} (${currSet.class})`;
+  document.querySelector('.set-name').textContent = `${itemName} (${currSet.class} / ${slotValues.name} / Lvl ${currSet.level})`;
   document.querySelector('.output-wrapper > textarea').value = wikiText;
 };
 
-const getCurrentSet = () => setData[getSelectIndex('setList')];
+const getCurrentSet = () => data.sets[getSelectIndex('setList')];
 const getCurrentSetItem = () => getCurrentSet().pieces[getSelectIndex('setItemList')];
 
 const getSelectIndex = (key) => parseInt(getEl(key).value, 10);
